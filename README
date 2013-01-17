@@ -1,0 +1,109 @@
+DiscSpan 0.2.2
+
+author:  James S. Martin  ceedvd ( a t )  g  m a i l .com
+maintainer: Richard M. Shaw  hobbes1069 ( a t ) g m a i l .com
+
+
+---------
+
+This tool is geared more towards smaller files such as music and photos 
+as it cannot span a single file across multiple discs.  
+
+If you have lots of files in the gigabyte  range, this utility won't be as efficient.
+
+The tool is written in Python and uses growisofs as the burning interface.
+
+
+Requirements
+------------
+
+It is known to work in Fedora 12, 13, RHEL 5.5, but should work on any recent 
+Linux system with growisofs, and python 2.5-2.6.  Requires the dbus-python module.
+
+
+running and installing DiscSpan
+----------------
+
+copy the discscan.py somewhere in your path.  Put discpan.ini in /etc, 
+/usr/local/etc, the same dir as discspan.py, or specify with --config=
+
+Please edit discspan.ini to reflect the speed of your media/device,
+as well as the capacity of your media.  I have seen cases where 
+media sizes are slightly varied
+
+
+run discspan.py.  
+
+Usage: discspan.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  --config=CONFIG_FILE  Location of config file.
+  --start-disc=START_DISC
+                        Specify disc to start with (in case of failed previous
+                        burn)
+  --skip-big            Skip files that are too big.
+  --test                Performs a test run of the burn.
+  --dir=BACKUP_DIR      Directory to backup.
+  --volume-name=VOLUME_NAME
+                        Name for the volume.
+  --size-factor=SIZE_FACTOR
+                        Specify size factor for disc capacity, i.e. 1 = 100%
+  --iso-dir=ISO_DIR     Redirect iso generation to a directory. Filename will
+                        be generated from volume name.
+  -v, --verbose         Extended verbosity
+
+
+
+If you don't supply a backup dir, you will be prompted.
+
+
+
+limitations
+-----------
+
+The discspan.ini measurements are defined in gibibyte and mebibyte.
+
+1G is defined as 2^30 bytes.
+
+Lots of media manufactures define their stuff in gigabytes, which is
+93% less than a gibibyte.  
+
+That's why the nubmers you see in discspan.ini may look different
+than what's labeled on your media.  Feel free to tweak to your 
+hearts content.
+
+
+
+Read here:  
+
+http://en.wikipedia.org/wiki/DVD-R
+http://en.wikipedia.org/wiki/Gigabyte
+
+
+
+
+discspan will not follow symlinks (yet) !
+
+DBUS doesn't detect the capacity of the disc properly so I can't modify
+these on the fly.  If someone can give me the capacity in bytes of a Dual Layer
+DVD or Blue Ray/HD-DVD, I can add that.
+
+I've guestimated values but if they are wrong, please tweek them and send
+me an appropriate update.
+
+Also, this has only been tested on dvd-r and dvd-rw media.
+
+
+
+
+Thank Yous
+-----------
+Thanks go out to Doc, Richard, Dez, Erin, Jason, Adam for their debugging, code contributions, and ideas!
+
+
+Thank you to Davyd Madeley and Dieter Verfaillie for their DBUS
+code examples!  Without that, I would not have figured out
+how to detect the DVD drive :).
+
+Also thanks to the #python channel on freenode.  Wonderful folks.

@@ -1,0 +1,87 @@
+DiscSpan Changelog:
+
+TODO:
+
+Support for following symlinks
+WARNING - If your stuff has symlinks, they will NOT be copied.
+
+Strip out the depedencie on HAL for getting disc / drive info,
+and put in something that's not on the list to be deprecated.
+
+Work with python burn developer to get disc spanning feature into
+their product. http://pypi.python.org/pypi/burn/0.4.6
+
+Win the lottery; build a hotel on the Moon; and retire.
+
+*** 0.2.2 - 2010.08.09 ***
+
+Fixed: Option "--test" option was broken in 0.2.1.
+
+Fixed: Don't eject tray when --test or --iso-dir options are used.
+
+Fixed: Cleaned up drive/media detection code a little and added more meaninful output. NOTE: On my system HAL does not get updated properly and causes issues detecting media. 
+
+Added: Option "--skip-big" was added to optionally skip files that were too big for ISO 9660 or recording media (CDs) instead of exiting.
+
+Added: Logic to try to predict ISO file system size to reduce need for --size-factor option.
+
+
+*** 0.2.1 - 2010.07.29 ***
+
+* "--size-factor" option was added for modifying the capacity of the disk on the fly. 
+* "--verbose" option will spit out the file names which is now normally suppresed. 
+* "--iso-dir" option was added to write to ISO files instead of directly to the burner
+* Some more diagnostic output was added, such as how many files will be on each disc and the approximate size of the finished disc. 
+
+
+*** 0.2.0 - 2010.06.08 ***
+
+Mostly re-written with less suck.  Tried an object-oriented approach.
+
+Should work on modern systems, tested on Fedora 12.
+
+Requires a discspan.ini file, speed _must_ be set in this file. 
+
+Have added a --help option, and using real option parsing now.
+
+We are using isolevel 4 for burns, as to not run in to 
+directory depth problems that exist with isolevel 3.
+
+Default config files can be /etc/discspan.ini or /usr/local/etc/discspan.ini.
+Otherwise it must be specified with the below option.
+
+New options:
+
+Usage: discspan.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  --start-disc=START_DISC
+                        Specify disc to start with (in case of failed previous
+                        burn)
+  --config=CONFIG_FILE  Location of config file.
+  --test                Performs a test run of the burn.
+  --dir=BACKUP_DIR      Directory to backup.
+  --volume-name=VOLUME_NAME
+                        Name for the volume.
+
+If you leave out --dir, you will be prompted for it.  The volume name
+will default to "spandisc" if it is not specified.
+
+
+*** 0.1.2 - 2007.12.3 ***
+
+Now capable of detecting dvd_rw, and dvd+ variants.
+Correctly traps CTRL+C.
+updated README.
+
+
+*** 0.1.1 - 2007.12.12 ***
+
+Better detection of disc media
+
+
+*** 0.1  - 2007.12.12 ***
+
+Initial Release
+
