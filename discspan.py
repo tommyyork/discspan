@@ -4,7 +4,7 @@ __author__ = "James S. Martin"
 __maintainer__ = "Richard M. Shaw"
 __credits__ = "Doc, Dez, Erin, Jason, Adam"
 __license__ = "GPL"
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 import os
 import sys
@@ -136,6 +136,21 @@ class System:
 
         return drive
 
+class DiscType:
+
+    def __init__(self, config, disc_type):
+
+        self.config = config
+        self.disc_type = disc_type
+
+    def wait_for_media(self):
+        '''note func name is taken from system class'''
+        h_capacity , b_capacity = self.config.get_capacity(self.disc_type)
+        drive = Drive('null_device', b_capacity, 'null_drive')
+        return drive
+    
+
+
 class Interface:
 
     def __init__(self, backup_dir, speed):
@@ -187,7 +202,6 @@ class Interface:
 class Iso:
 
     def __init__(self, inputs, system):
-
         self.inputs = inputs
         self.system = system
         self.drive = self.system.wait_for_media()
@@ -363,6 +377,9 @@ if __name__ == "__main__":
                       default=False, help="Redirect iso generation to a directory. Filename will be generated from volume name.")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       default=False, help="Extended verbosity", metavar="VERBOSE")
+    parser.add_option("--disc-type", dest="disc_type", 
+                    help="specify a target disc type, as specified in discspan.ini,rather than detect from drive. Only works with the --iso-dir option." , metavar="DISC_TYPE")
+
 
     (options, args) = parser.parse_args()
 
@@ -378,7 +395,12 @@ if __name__ == "__main__":
 
     print "Using", config_file, "as config file."
     c = Config(config_file)
-    s = System(c)
+    
+    if options.disc_type and options.iso_dir:
+        s = DiscType(c, options.disc_type)
+    else:
+        s = System(c)
+
     interface = Interface(options.backup_dir,c.speed)
     iso = Iso(interface, s)
     discs = iso.calculate_discs()
