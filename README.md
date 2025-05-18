@@ -14,7 +14,6 @@ If you have lots of files in the gigabyte range, this utility won't be as effici
 
 The tool is written in Python and uses growisofs as the burning interface.
 
-------------
 # Requirements
 ISO generation is confirmed to work on a Synology NAS (with various packages
 installed via opkg, and some packages compiled and installed from source 
@@ -29,7 +28,6 @@ distribution.
 Burning is untested, and relies on dbus/Hal and growisofs, though the dbus
 module was upgraded to `dbus-next` from `dbus-python`. 
 
-----------------
 # Installation
 
 There are submodules for Hal (hardware abstraction layer), and schilytools (mkisofs). You can populate these repositories with:
@@ -61,7 +59,6 @@ export DBUS_SESSION_BUS_PID=25016
 
 You will need a service definition for Hal that the dbus module can find.
 
-----------
 # Disc Type Options
 
 ```
@@ -83,7 +80,6 @@ bd-xl-triple = 93.1G 99965363814
 bd-xl-quadruple = 119.2G 127990025420
 ```
 
-----------
 # Usage
 
 Usage: discspan.py [options]
@@ -107,7 +103,6 @@ Options:
 
 If you don't supply a backup dir, you will be prompted.
 
-----------
 # Notes
 
 The discspan.ini measurements are defined in gibibyte and mebibyte.
