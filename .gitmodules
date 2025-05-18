@@ -1,0 +1,3 @@
+[submodule "schilytools"]
+	path = schilytools
+	url = https://codeberg.org/schilytools/schilytools.git

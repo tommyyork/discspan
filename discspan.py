@@ -12,21 +12,23 @@ import os.path
 import math
 import subprocess
 import tempfile
-import dbus
 import readline
-import ConfigParser
+import configparser
 import string
+import asyncio
+from dbus_next.aio import MessageBus
 from decimal import *
 from optparse import OptionParser
 from time import sleep
 
 debug = False
+loop = asyncio.get_event_loop()
 
 class Config:
 
     def __init__(self, cfgfile):
-
-        self.config = ConfigParser.SafeConfigParser()
+        ConfigParser = configparser.ConfigParser()
+        self.config = ConfigParser 
         self.config.read(cfgfile)
         self.media = self.config.options('media')
         self.speed = self.config.get('drive', 'speed')
@@ -42,7 +44,7 @@ class Config:
             b_value = Decimal(s_value) * 2**30
 
         else:
-            print "Size does matter. Make sure you've specified a M or G after your media config file."
+            print("Size does matter. Make sure you've specified a M or G after your media config file.")
             sys.exit(1)
 
         return str(b_value)
@@ -50,7 +52,7 @@ class Config:
     def get_capacity(self, medium):
         "Returns capacity of disc type in both human readable and in bytes."
 
-        h_capacity, b_capacity = string.split(self.config.get('media', medium))
+        h_capacity, b_capacity = str.split(self.config.get('media', medium))
 
         return h_capacity, b_capacity
 
@@ -69,43 +71,44 @@ class System:
 
         self.config = config
 
-    def find_drives(self):
-
+    async def find_drives(self):
+        
         drive = None
-        bus = dbus.SystemBus()
-        hal_obj = bus.get_object('org.freedesktop.Hal', '/org/freedesktop/Hal/Manager')
-        hal = dbus.Interface(hal_obj, 'org.freedesktop.Hal.Manager')
+        bus = await MessageBus().connect()
+        introspection = await bus.introspect('org.freedesktop.Hal', '/org/freedesktop/Hal/Manager') 
+        hal_obj = bus.get_proxy_object('org.freedesktop.Hal', '/org/freedesktop/Hal/Manager', introspection)
+        hal = hal_obj.get_interface('org.freedesktop.Hal.Manager')
         drives = []
         udis = []
 
         for udi in hal.FindDeviceByCapability('volume'):
-            if debug: print udi
+            if debug: print(udi)
 
-            dev_obj = bus.get_object('org.freedesktop.Hal', udi)
-            dev = dbus.Interface(dev_obj, 'org.freedesktop.Hal.Device')
+            dev_obj = bus.get_proxy_object('org.freedesktop.Hal', udi)
+            dev = dev_obj.get_interface('org.freedesktop.Hal.Device')
 
             try: volume_disc_type = dev.GetProperty('volume.disc.type')
             except: continue
 
             if volume_disc_type in self.config.media:
                 device_name = dev.GetProperty('block.device')
-                print "Media found in %s" % device_name
+                print('Media found in {0}'.format(device_name))
 
             else:
-                print "No recordable media found in %s." % device_name
+                print("No recordable media found in {0}.".format(device_name))
                 continue
 
             if not dev.GetProperty('volume.disc.is_blank'):
-                print "HAL says media in %s is not blank." % dev.GetProperty('block.device')
+                print("HAL says media in {0} is not blank.".format(dev.GetProperty('block.device')))
                 continue
 
             else:
-                parent_obj = bus.get_object('org.freedesktop.Hal', dev.GetProperty("info.parent"))
-                parent = dbus.Interface(parent_obj, 'org.freedesktop.Hal.Device')
+                parent_obj = bus.get_proxy_object('org.freedesktop.Hal', dev.GetProperty("info.parent"))
+                parent = parent_obj.get_interface('org.freedesktop.Hal.Device')
                 h_capacity , b_capacity = self.config.get_capacity(dev.GetProperty('volume.disc.type'))
                 drive_name = parent.GetProperty('info.product')
                 drive = Drive(device_name, b_capacity, drive_name)
-                print "The disc capacity of the disc in %s (%s) is %s." % (drive.device, drive.model, h_capacity)
+                print("The disc capacity of the disc in {0} {1} is {2}.".format(drive.device, drive.model, h_capacity))
                 drives.append(drive)
 
         if len(drives) == 1:
@@ -113,25 +116,26 @@ class System:
             statement = '\nUsing %s (%s) as your dvd burner' % (drive.device, drive.model)
 
         elif len(drives) > 1:
-            print "Don't make this difficult.  Please only put one piece of writable" \
-            "medium in your system at a time."
+            print("Don't make this difficult.  Please only put one piece of writable medium in your system at a time.")
             sys.exit(1)
 
         return drive
+        
+        return None
 
     def wait_for_media(self):
 
         n = 0
-        drive = self.find_drives()
+        drive = loop.run_until_complete(self.find_drives())
         if drive == None:
-            print "Insert disc and wait for drive to become ready..."
+            print("Insert disc and wait for drive to become ready...")
             
         while drive == None:
-            drive = self.find_drives()
+            drive = loop.run_until_complete(self.find_drives())
             sleep(3)
             n = n + 1
             if n >= 30:
-                print "Unable to detect media, exiting."
+                print("Unable to detect media, exiting.")
                 sys.exit(1)
 
         return drive
@@ -158,7 +162,7 @@ class Interface:
         if self.validate_speed(speed):
             self.speed = speed
         else:
-            print 'Your drive speed (%s) is invalid.' % self.speed
+            print('Your drive speed ({0}) is invalid.'.format(self.speed))
             sys.exit(1)
 
         if backup_dir == None:
@@ -166,14 +170,14 @@ class Interface:
         elif self.validate_backup_dir(backup_dir):
             self.backup_dir = backup_dir
         else:
-            print 'Directory option is not valid.'
+            print('Directory option is not valid.')
             self.backup_dir = self.ask_questions()
 
     def ask_questions(self):
 
         valid = False
         while not valid:
-            backup_dir = raw_input('Which directory would you like to backup? (Or Q to quit)\n')
+            backup_dir = input('Which directory would you like to backup? (Or Q to quit)\n')
             if backup_dir in ('Q','q'):
                 sys.exit(1)
             valid = self.validate_backup_dir(backup_dir)
@@ -188,15 +192,15 @@ class Interface:
             int(speed)
             return True
         except:
-            print speed, 'is not a valid number.'
+            print(speed, 'is not a valid number.')
             return False
 
     def validate_backup_dir(self, backup_dir):
-
+        print(backup_dir, "Is Directory?", os.path.isdir(backup_dir))
         if os.path.isdir(backup_dir):
             return True
         else:
-            print "You must enter a valid directory."
+            print("You must enter a valid directory.")
             return False
 
 class Iso:
@@ -209,11 +213,11 @@ class Iso:
     def build_list(self, files):
 
         disc_capacity = int(float(self.drive.capacity) * float(options.size_factor))
-        print "Disc capacity reported by drive is: " + str(int(self.drive.capacity))
+        print("Disc capacity reported by drive is: " + str(int(self.drive.capacity)))
         if options.size_factor != 1:
-            print " Adjusted disc capacity set to: " + str(disc_capacity)
+            print(" Adjusted disc capacity set to: " + str(disc_capacity))
 
-        print "Building file lists..."
+        print("Building file lists...")
         file_count = 1
         # First 32768 bytes are unused by ISO 9660
         disc_size = 32768
@@ -233,7 +237,7 @@ class Iso:
 
             if disc_size >= disc_capacity:
                 disc_list.append(disc_files)
-                print 'Disc %s will contain %s files using %dMB.' % (str(len(disc_list)), str(len(disc_files)),disc_size/(2**20))
+                print('Disc %s will contain %s files using %dMB.' % (str(len(disc_list)), str(len(disc_files)),disc_size/(2**20)))
                 disc_size = 0
                 disc_size += iso_size
                 disc_files = []
@@ -242,12 +246,12 @@ class Iso:
                 disc_files.append(file)
 
         disc_list.append(disc_files)
-        print 'Disc %s will contain %s files using %dMB.' % (str(len(disc_list)), str(len(disc_files)),disc_size/(2**20))
+        print('Disc {0} will contain {1} files using {2}MB.'.format(str(len(disc_list)), str(len(disc_files)), disc_size/(2**20)))
         return (disc_list)
 
     def calculate_discs(self):
 
-        print "Calculating discs..."
+        print("Calculating discs...")
         dir = self.inputs.backup_dir
         # First 32768 bytes are unused by ISO 9660
         total_size = 32768
@@ -268,20 +272,20 @@ class Iso:
         for file in file_list:
             if not os.path.islink(file):
                 size = os.path.getsize(file)
-                if options.verbose: print file, size
+                if options.verbose: print(file, size)
                 # Individual files must be smaller than 4GiB -1.
                 if size >= 4*2**30 and not options.skip_big:
-                    print "%s is to big. ISO 9660 requires individual files to be smaller than 4GiB." % file
+                    print("%s is to big. ISO 9660 requires individual files to be smaller than 4GiB." % file)
                     sys.exit(1)
                 elif size >= disc_capacity - 32768 and not options.skip_big:
-                    print "%s will not fit on the current media. Try the --skip-big option to workaround." % file
+                    print("%s will not fit on the current media. Try the --skip-big option to workaround." % file)
                     sys.exit(1)
                 elif size >= 4*2**30 and options.skip_big:
-                    print "%s will be skipped because it is too big for ISO 9660." % file
+                    print("%s will be skipped because it is too big for ISO 9660." % file)
                     file_list.remove(file)
                     continue
                 elif size >= disc_capacity - 32768 and options.skip_big:
-                    print "%s will be skipped because it is too big for the current media." % file
+                    print("%s will be skipped because it is too big for the current media." % file)
                     file_list.remove(file)
                     continue
                 else:
@@ -289,25 +293,23 @@ class Iso:
 
         num_discs = int(math.ceil(total_size/disc_capacity))
         discs = self.build_list(file_list)
-        print "\nNumber of %s's required to burn: %s" % ("dvd", len(discs))
+        print("\nNumber of %s's required to burn: %s" % ("dvd", len(discs)))
         file_count = 0
 
         for disc in discs:
             file_count = file_count + len(disc)
 
-        print "\nSanity Check:\n"
-        print "Total files in directory: ", len(file_list)
-        print "Total files in all discs: ", file_count
+        print("\nSanity Check:\n")
+        print("Total files in directory: ", len(file_list))
+        print("Total files in all discs: ", file_count)
 
-        print 'Total discs still: ' + str(len(discs))
+        print('Total discs still: ' + str(len(discs)))
         return discs
 
 
     def burn(self, disc, disc_num, total_disc, volume_name, test, iso_dir):
-
-
         msg = "\nReady to burn disc %s/%s."  % (disc_num, total_disc )
-        print msg
+        print(msg)
         if int(disc_num) > 1:
             input=raw_input("Press enter to continue...")
         speed = self.inputs.speed
@@ -326,13 +328,13 @@ class Iso:
         output.close()
 
         if test :
-            print 'Test write option enabled.'
+            print('Test write option enabled.')
             drive = '/dev/null'
         else:
             drive = self.drive.device
 
         if iso_dir :
-            print 'ISO will be written to a file.'
+            print('ISO will be written to a file.')
             if iso_dir[len(iso_dir)-1:] != "/":
                 iso_dir += "/"
             iso_file = iso_dir + volume_name + ".iso"
@@ -348,7 +350,7 @@ class Iso:
 
         burn_cmd = burn_cmd + ' -path-list %s' % temp_list
         p = subprocess.Popen("%s" % (burn_cmd), shell=True)
-        print burn_cmd
+        print(burn_cmd)
         sts = os.waitpid(p.pid, 0)
         os.unlink(temp_list)
         if not test and not iso_dir:
@@ -393,7 +395,7 @@ if __name__ == "__main__":
             if os.path.isfile(file):
                 config_file = file
 
-    print "Using", config_file, "as config file."
+    print("Using", config_file, "as config file.")
     c = Config(config_file)
     
     if options.disc_type and options.iso_dir:
