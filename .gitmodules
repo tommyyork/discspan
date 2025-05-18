@@ -4,3 +4,12 @@
 [submodule "hal-info"]
 	path = hal-info
 	url = https://gitlab.freedesktop.org/archived-projects/hal/hal-info.git
+[submodule "hal"]
+	path = hal
+	url = https://gitlab.freedesktop.org/archived-projects/hal/hal.git
+[submodule "libtool"]
+	path = libtool
+	url = git://git.savannah.gnu.org/libtool.git
+[submodule "libexpat"]
+	path = libexpat
+	url = https://github.com/libexpat/libexpat.git

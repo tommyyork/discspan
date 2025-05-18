@@ -24,6 +24,13 @@ Linux system with growisofs, and python 2.5-2.6.  Requires the dbus-python modul
 running and installing DiscSpan
 ----------------
 
+Run dbus_launch, which will give you two environment variables. Set these.
+
+```
+export DBUS_SESSION_BUS_ADDRESS=unix:path=/opt/tmp/dbus-B6rOXjeoH3,guid=dc6a75978ed47c071b7ab0916829421a
+export DBUS_SESSION_BUS_PID=25016
+```
+
 copy the discscan.py somewhere in your path.  Put discpan.ini in /etc, 
 /usr/local/etc, the same dir as discspan.py, or specify with --config=
 

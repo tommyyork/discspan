@@ -44,7 +44,7 @@ class Config:
             b_value = Decimal(s_value) * 2**30
 
         else:
-            print("Size does matter. Make sure you've specified a M or G after your media config file.")
+            print("Make sure you've specified a M or G after your media config file.")
             sys.exit(1)
 
         return str(b_value)

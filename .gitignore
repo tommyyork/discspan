@@ -1,4 +1,8 @@
-*.py.swp
+*.swp
 bin/
 lib/
 lib64
+.DS_Store
+.README.swp
+.discspan.ini.swp
+@eaDir/
