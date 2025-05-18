@@ -24,22 +24,59 @@ Linux system with growisofs, and python 2.5-2.6.  Requires the dbus-python modul
 running and installing DiscSpan
 ----------------
 
-Run dbus_launch, which will give you two environment variables. Set these.
+Directories for Hal (hardware abstraction layer), and schilytools (which is now the suite that contains mkisofs).
+Set up a venv for discspin:
+
+`python3 -m /path/to/discspin`
+
+Enter the directory, then activate the venv:
+
+`source ./bin/activate`
+
+Then install dependencies via run `pip install -r requirements.txt`
+
+Put discpan.ini in /etc, /usr/local/etc, the same dir as discspan.py, 
+or specify with --config=
+
+To split a folder across multiple blu-ray ISOs (dual layer, in this case):
+
+python discspan.py --iso-dir /volume1/backup/discspan --dir "/volume3/Lightroom/Film Backups" --config ./discspan.ini --disc-type bd-r-dual
+
+Definition for the different media types is available in `discspan.ini`.
+
+Burning directly is not yet supported, but you can get close (with dbus_next). Run `dbus_launch`, which will give you two environment variables. Set these.
 
 ```
 export DBUS_SESSION_BUS_ADDRESS=unix:path=/opt/tmp/dbus-B6rOXjeoH3,guid=dc6a75978ed47c071b7ab0916829421a
 export DBUS_SESSION_BUS_PID=25016
 ```
 
-copy the discscan.py somewhere in your path.  Put discpan.ini in /etc, 
-/usr/local/etc, the same dir as discspan.py, or specify with --config=
-
 Please edit discspan.ini to reflect the speed of your media/device,
 as well as the capacity of your media.  I have seen cases where 
-media sizes are slightly varied
+media sizes are slightly varied.
 
+Options for disc type are:
 
-run discspan.py.  
+```
+floppy = 1.44MiB 147456
+cdr = 700M 737280000
+dvd_r = 4.384G 4707319808
+dvd_rw = 4.384G 4707319808
+dvd_r_dl = 7.957G 8543666176
+dvd_rw_dl = 7.957G 8543666176
+dvd_plus_r = 4.378G 4700372992
+dvd_plus_rw = 4.378G 4700372992
+dvd_plus_r_dl = 7.961G 8547991552
+dvd_plus_rw_dl = 7.961G 8547991552
+bd-r-single =  23.3G 25018184499
+bd-r-dual = 46.6GiB 50036368998
+bd-re-single = 23.3GiB 25018184499
+bd-re-dual = 46.6GiB 50036368998
+bd-xl-triple = 93.1GiB 99965363814
+bd-xl-quadruple = 119.2GiB 127990025420
+```
+
+-----------
 
 Usage: discspan.py [options]
 
@@ -64,7 +101,25 @@ Options:
 
 If you don't supply a backup dir, you will be prompted.
 
+Options for disc type are:
 
+
+floppy = 1.44MiB 147456
+cdr = 700M 737280000
+dvd_r = 4.384G 4707319808
+dvd_rw = 4.384G 4707319808
+dvd_r_dl = 7.957G 8543666176
+dvd_rw_dl = 7.957G 8543666176
+dvd_plus_r = 4.378G 4700372992
+dvd_plus_rw = 4.378G 4700372992
+dvd_plus_r_dl = 7.961G 8547991552
+dvd_plus_rw_dl = 7.961G 8547991552
+bd-r-single =  23.3G 25018184499
+bd-r-dual = 46.6GiB 50036368998
+bd-re-single = 23.3GiB 25018184499
+bd-re-dual = 46.6GiB 50036368998
+bd-xl-triple = 93.1GiB 99965363814
+bd-xl-quadruple = 119.2GiB 127990025420
 
 limitations
 -----------
@@ -76,7 +131,7 @@ The discspan.ini measurements are defined in gibibyte and mebibyte.
 Lots of media manufactures define their stuff in gigabytes, which is
 93% less than a gibibyte.  
 
-That's why the nubmers you see in discspan.ini may look different
+That's why the numbmers you see in discspan.ini may look different
 than what's labeled on your media.  Feel free to tweak to your 
 hearts content.
 

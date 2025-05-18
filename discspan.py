@@ -310,8 +310,8 @@ class Iso:
     def burn(self, disc, disc_num, total_disc, volume_name, test, iso_dir):
         msg = "\nReady to burn disc %s/%s."  % (disc_num, total_disc )
         print(msg)
-        if int(disc_num) > 1:
-            input=raw_input("Press enter to continue...")
+        if int(disc_num) > 1 and not iso_dir:
+            input_confirmation = input("Press enter to continue...")
         speed = self.inputs.speed
         drive = self.system.wait_for_media()
         dir = self.inputs.backup_dir
@@ -334,7 +334,7 @@ class Iso:
             drive = self.drive.device
 
         if iso_dir :
-            print('ISO will be written to a file.')
+            print('ISO will be  written to a file.')
             if iso_dir[len(iso_dir)-1:] != "/":
                 iso_dir += "/"
             iso_file = iso_dir + volume_name + ".iso"
