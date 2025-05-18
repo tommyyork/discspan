@@ -17,7 +17,7 @@ The tool is written in Python and uses growisofs as the burning interface.
 # Requirements
 ISO generation is confirmed to work on a Synology NAS (with various packages
 installed via opkg, and some packages compiled and installed from source 
-(like libtool) where the `-devel` package that would live in something like Debian's APT 
+(like libtool) where the `-devel` package that would live in something like Debian's APT
 aren't available in opkg for Synology).
 I've left submodules for these projects, some of which were surprisingly
 difficult to find. For example `mkisofs` is currently a part of `schilytools`
