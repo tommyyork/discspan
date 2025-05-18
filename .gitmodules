@@ -1,3 +1,6 @@
 [submodule "schilytools"]
 	path = schilytools
 	url = https://codeberg.org/schilytools/schilytools.git
+[submodule "hal-info"]
+	path = hal-info
+	url = https://gitlab.freedesktop.org/archived-projects/hal/hal-info.git

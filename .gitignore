@@ -1,0 +1,4 @@
+*.py.swp
+bin/
+lib/
+lib64
