@@ -337,7 +337,7 @@ class Iso:
             print('ISO will be  written to a file.')
             if iso_dir[len(iso_dir)-1:] != "/":
                 iso_dir += "/"
-            iso_file = iso_dir + volume_name + ".iso"
+            iso_file = iso_dir + volume_name + "_" + str(disc_num) + ".iso"
             burn_cmd = "mkisofs -o %s -V %s -A DiscSpan -p Unknown" \
                        " -iso-level 4 -l -r -hide-rr-moved -J -joliet-long" \
                        " -graft-points" % (iso_file, volume_name)
