@@ -339,13 +339,13 @@ class Iso:
                 iso_dir += "/"
             iso_file = iso_dir + volume_name + "_" + str(disc_num) + ".iso"
             burn_cmd = "mkisofs -o %s -V %s -A DiscSpan -p Unknown" \
-                       " -iso-level 4 -l -r -hide-rr-moved -J -joliet-long" \
+                       " -iso-level 4 -l -r -hide-rr-moved " \
                        " -graft-points" % (iso_file, volume_name)
         else :
             burn_cmd = "growisofs -Z %s -speed=%s -use-the-force-luke=notray" \
                        " -use-the-force-luke=tty  " \
                        " -V %s -A DiscSpan -p Unknown -iso-level 4" \
-                       " -l -r -hide-rr-moved -J -joliet-long" \
+                       " -l -r -hide-rr-moved" \
                        " -graft-points" % (drive, speed, volume_name)
 
         burn_cmd = burn_cmd + ' -path-list %s' % temp_list
@@ -365,6 +365,8 @@ if __name__ == "__main__":
                       help="Location of config file.")
     parser.add_option("--start-disc", dest="start_disc",
                       default=1, help="Specify disc to start with (in case of failed previous burn)", metavar="START_DISC")
+    parser.add_option("--last-disc", dest="last_disc",
+                      default=None, help="Specify disc to end with (in case of a failure)", metavar="LAST_DISC")
     parser.add_option("--skip-big", action="store_true", dest="skip_big",
                       default=False, help="Skip files that are too big.", metavar="SKIP_BIG")
     parser.add_option("--test", action="store_true", dest="test",
@@ -408,11 +410,18 @@ if __name__ == "__main__":
     discs = iso.calculate_discs()
     disc_num = int(options.start_disc)
 
-    for disc in discs[(int(disc_num)-1):]:
+    if options.last_disc is not None:
+        last_disc = int(options.last_disc)
+    else:
+        last_disc = None
+
+    for disc_file_list in discs[(int(disc_num)-1):]:
             # Basic logic to prevent volume names that are too long.
+        if last_disc is not None and disc_num > last_disc:
+           continue 
         if len(options.volume_name) <= 30 - len(discs):
             volume_name = options.volume_name + '_' + str(disc_num)
         else: volume_name = options.volume_name
 
-        iso.burn(disc, disc_num, len(discs), volume_name, options.test, options.iso_dir)
+        iso.burn(disc_file_list, disc_num, len(discs), volume_name, options.test, options.iso_dir)
         disc_num = disc_num + 1
